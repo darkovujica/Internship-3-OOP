@@ -9,6 +9,7 @@ namespace Project_manager_app
 {
     public class Project
     {
+        public Guid Id { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }
         public DateTime StartDate { get; set; }
@@ -17,6 +18,7 @@ namespace Project_manager_app
 
         public Project(string name, string description, DateTime startDate, DateTime endDate, StatusProject status)
         {
+            Id = Guid.NewGuid();
             Name = name;
             Description = description;
             StartDate = startDate;

@@ -10,6 +10,6 @@ namespace Project_manager_app.Enums
     {
         Active,
         OnHold,
-        Finished
+        Completed
     }
 }

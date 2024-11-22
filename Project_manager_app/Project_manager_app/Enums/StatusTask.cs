@@ -9,7 +9,7 @@ namespace Project_manager_app.Enums
     public enum StatusTask
     {
         Active,
-        Finished,
-        Deferred
+        Postponed,
+        Completed
     }
 }
