@@ -12,4 +12,10 @@ namespace Project_manager_app.Enums
         Postponed,
         Completed
     }
+    public enum Priority
+    {
+        High,
+        Medium,
+        Low
+    }
 }

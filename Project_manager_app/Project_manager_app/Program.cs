@@ -1,6 +1,7 @@
 ﻿using Microsoft.SqlServer.Server;
 using Project_manager_app.Enums;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -30,6 +31,7 @@ namespace Project_manager_app
                     new DateTime(2024, 11, 30),
                     StatusTask.Active,
                     240,
+                    Priority.High,
                     project1
                 ),
                 new Task
@@ -39,6 +41,7 @@ namespace Project_manager_app
                     new DateTime(2024, 11, 29),
                     StatusTask.Active,
                     180,
+                    Priority.High,
                     project1
                 ),
                 new Task
@@ -48,6 +51,7 @@ namespace Project_manager_app
                     new DateTime(2024, 11, 10),
                     StatusTask.Completed,
                     300,
+                    Priority.Medium,
                     project1
                 )
             };
@@ -69,6 +73,7 @@ namespace Project_manager_app
                     new DateTime(2024, 11, 29),
                     StatusTask.Active,
                     200,
+                    Priority.Medium,
                     project2
                 ),
                 new Task
@@ -78,6 +83,7 @@ namespace Project_manager_app
                     new DateTime(2024, 12, 1),
                     StatusTask.Active,
                     240,
+                    Priority.Low,
                     project2
                 ),
                 new Task
@@ -87,6 +93,7 @@ namespace Project_manager_app
                     new DateTime(2024, 11, 27),
                     StatusTask.Active,
                     120,
+                    Priority.High,
                     project2
                 )
             };
@@ -107,6 +114,7 @@ namespace Project_manager_app
                     new DateTime(2024, 11, 25),
                     StatusTask.Postponed,
                     150,
+                    Priority.High,
                     project3
                 ),
                 new Task
@@ -116,6 +124,7 @@ namespace Project_manager_app
                     new DateTime(2024, 11, 26),
                     StatusTask.Completed,
                     100,
+                    Priority.Low,
                     project3
                 )
             };
@@ -135,7 +144,8 @@ namespace Project_manager_app
                     "Train an NLP model for understanding user queries.",
                     new DateTime(2023, 12, 15),
                     StatusTask.Completed,
-                    300, 
+                    300,
+                    Priority.Medium,
                     project4
                 ),
                 new Task
@@ -145,6 +155,7 @@ namespace Project_manager_app
                     new DateTime(2024, 2, 10),
                     StatusTask.Completed,
                     120,
+                    Priority.High,
                     project4
                 )
             };
@@ -164,6 +175,7 @@ namespace Project_manager_app
                     new DateTime(2024, 2, 20),
                     StatusTask.Completed,
                     240,
+                    Priority.High,
                     project5
                 ),
                 new Task(
@@ -172,6 +184,7 @@ namespace Project_manager_app
                     new DateTime(2024, 3, 10),
                     StatusTask.Postponed,
                     180,
+                    Priority.High,
                     project5
                 ),
                 new Task(
@@ -180,6 +193,7 @@ namespace Project_manager_app
                     new DateTime(2024, 4, 25),
                     StatusTask.Active,
                     120,
+                    Priority.Medium,
                     project5
                 )
             };
@@ -199,6 +213,7 @@ namespace Project_manager_app
                     new DateTime(2023, 12, 15),
                     StatusTask.Completed,
                     200,
+                    Priority.Medium,
                     project6
                 ),
                 new Task(
@@ -207,6 +222,7 @@ namespace Project_manager_app
                     new DateTime(2024, 1, 20),
                     StatusTask.Completed,
                     180,
+                    Priority.Low,
                     project6
                 ),
                 new Task(
@@ -215,6 +231,7 @@ namespace Project_manager_app
                     new DateTime(2024, 2, 10),
                     StatusTask.Completed,
                     90,
+                    Priority.Low,
                     project6
                 )
             };
@@ -234,6 +251,7 @@ namespace Project_manager_app
                     new DateTime(2024, 2, 25),
                     StatusTask.Postponed,
                     150,
+                    Priority.High,
                     project7
                 ),
                 new Task(
@@ -242,6 +260,7 @@ namespace Project_manager_app
                     new DateTime(2024, 3, 15),
                     StatusTask.Postponed,
                     120,
+                    Priority.Low,
                     project7
                 ),
                 new Task(
@@ -250,6 +269,7 @@ namespace Project_manager_app
                     new DateTime(2024, 4, 30),
                     StatusTask.Postponed,
                     200,
+                    Priority.High,
                     project7
                 )
             };
@@ -269,6 +289,7 @@ namespace Project_manager_app
                 new DateTime(2023, 11, 1),
                     StatusTask.Completed,
                     240,
+                    Priority.High,
                     project8
                 ),
                 new Task(
@@ -277,6 +298,7 @@ namespace Project_manager_app
                     new DateTime(2023, 12, 20),
                     StatusTask.Completed,
                     180,
+                    Priority.Medium,
                     project8
                 ),
                 new Task(
@@ -285,6 +307,7 @@ namespace Project_manager_app
                     new DateTime(2024, 1, 15),
                     StatusTask.Completed,
                     90,
+                    Priority.Low,
                     project8
                 )
             };
@@ -304,6 +327,7 @@ namespace Project_manager_app
                     new DateTime(2024, 4, 10),
                     StatusTask.Active,
                     200,
+                    Priority.Low,
                     project9
                 ),
                 new Task(
@@ -312,6 +336,7 @@ namespace Project_manager_app
                     new DateTime(2024, 5, 15),
                     StatusTask.Active,
                     180,
+                    Priority.Low,
                     project9
                 ),
                 new Task(
@@ -320,6 +345,7 @@ namespace Project_manager_app
                     new DateTime(2024, 6, 25),
                     StatusTask.Postponed,
                     120,
+                    Priority.High,
                     project9
                 )
             };
@@ -332,8 +358,8 @@ namespace Project_manager_app
             do
             {
                 Console.Clear();
-                Console.Write("1 - View all projects with their tasks\n2 - Add new project\n3 - Delete project\n4 - View all tasks upcoming within seven days\n5 - View projects filtered by their status\n6 - Manage the project\n7 - Manage the task\n8 - Exit the application\n");
-                var choosenOption = ChooseOption(new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 });
+                Console.Write("1 - View all projects with their tasks\n2 - Add new project\n3 - Delete project\n4 - View all tasks upcoming within seven days\n5 - View projects filtered by their status\n6 - Manage the project\n7 - Manage the task\n8 - Sort tasks\n9 - Exit the application\n");
+                var choosenOption = ChooseOption(new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9 });
 
                 Console.Clear();
                 switch (choosenOption)
@@ -363,6 +389,10 @@ namespace Project_manager_app
                         ManageTask(projectsAndTasks);
                         break;
                     case 8:
+                        SortTasks(projectsAndTasks);
+                        Console.ReadKey();
+                        break;
+                    case 9:
                         exitMenu = true;
                         break;
                     default:
@@ -547,8 +577,9 @@ namespace Project_manager_app
             var deadline = NewFutureDate("task start");
             var status = NewStatusTask();
             var expectedDuration = NewNumber("Expected duration of project in minutes: ");
+            var priority = NewTaskPriority();
 
-            return new Task(name, description, deadline, status, expectedDuration, project);
+            return new Task(name, description, deadline, status, expectedDuration, priority, project);
         }
         static void DeleteTask(Project project, Dictionary<Project, List<Task>> projectsAndTasks)
         {
@@ -763,6 +794,18 @@ namespace Project_manager_app
             else
                 return StatusTask.Completed;
         }
+        static Priority NewTaskPriority()
+        {
+            Console.Write("\nTask priority:\n1 - High\n2 - Medium\n3 - Low\n");
+
+            var choosedOption = ChooseOption(new List<int>() { 1, 2, 3 });
+            if (choosedOption == 1)
+                return Priority.High;
+            else if (choosedOption == 2)
+                return Priority.Medium;
+            else
+                return Priority.Low;
+        }
 
 
 
@@ -784,7 +827,7 @@ namespace Project_manager_app
         }
         static void PrintTask(Task task)
         {
-            Console.Write($"Task name: {task.Name}\nDescription: {task.Description}\nDeadline: {task.Deadline}\nStatus: {task.Status}\nExpected duration: {task.ExpectedDuration}\nProject name: {task.Project.Name}\n\n");
+            Console.Write($"Task name: {task.Name}\nDescription: {task.Description}\nDeadline: {task.Deadline}\nStatus: {task.Status}\nExpected duration: {task.ExpectedDuration}\nPriority: {task.Priority}\nProject name: {task.Project.Name}\n\n");
         }
 
 
@@ -898,6 +941,71 @@ namespace Project_manager_app
                     Console.Write("Choosen input wasn't correct. ");
                 }
             } while (true);
+        }
+
+
+
+        static void SortTasks(Dictionary<Project, List<Task>> projectsAndTasks)
+        {
+            Console.Clear();
+            var listOfTasks = new List<Task>();
+
+            foreach (var project in projectsAndTasks.Keys)
+            {
+                foreach(var task in projectsAndTasks[project])
+                {
+                    listOfTasks.Add(task);
+                }
+            }
+            if (ChooseBetweenTwoOptions("1 - Sort tasks by expected duration\n2 - Sort tasks by priority\n"))
+                SortTasksByExpectedDuration(listOfTasks);
+            else
+                SortTasksByPriority(listOfTasks);
+        }
+        static void SortTasksByExpectedDuration(List<Task> listOfTasks)
+        {
+            listOfTasks.Sort((a, b) => a.ExpectedDuration.CompareTo(b.ExpectedDuration));
+
+            var detailPrint = ChooseOptionText("\nDo you want detail printout? ");
+            Console.Clear();
+
+            if (detailPrint)
+            {
+                foreach(Task task in listOfTasks)
+                    PrintTask(task);
+            }
+            else
+                PrintNamesOfTasksInsideList(listOfTasks);
+        }
+        static void SortTasksByPriority(List<Task> listOfTasks)
+        {
+            var detailPrint = ChooseOptionText("\nDo you want detail printout? ");
+            Console.Clear();
+
+            foreach(var task in listOfTasks)
+            {
+                if (task.Priority == Priority.High)
+                    if (detailPrint)
+                        PrintTask(task);
+                    else
+                        Console.WriteLine(task.Name);
+            }
+            foreach (var task in listOfTasks)
+            {
+                if (task.Priority == Priority.Medium)
+                    if (detailPrint)
+                        PrintTask(task);
+                    else
+                        Console.WriteLine(task.Name);
+            }
+            foreach (var task in listOfTasks)
+            {
+                if (task.Priority == Priority.Low)
+                    if (detailPrint)
+                        PrintTask(task);
+                    else
+                        Console.WriteLine(task.Name);
+            }
         }
     }
 }

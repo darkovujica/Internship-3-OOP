@@ -15,9 +15,10 @@ namespace Project_manager_app
         public DateTime Deadline { get; set; }
         public StatusTask Status { get; set; }
         public int ExpectedDuration { get; set; }
+        public Priority Priority { get; set; }
         public Project Project { get; set; }
 
-        public Task(string name, string description, DateTime deadline, StatusTask status, int expected_duration, Project project)
+        public Task(string name, string description, DateTime deadline, StatusTask status, int expected_duration, Priority priority, Project project)
         {
             Id = Guid.NewGuid();
             Name = name;
@@ -25,6 +26,7 @@ namespace Project_manager_app
             Deadline = deadline;
             Status = status;
             ExpectedDuration = expected_duration;
+            Priority = priority;
             Project = project;
         }
     }
