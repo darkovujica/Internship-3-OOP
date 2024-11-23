@@ -459,9 +459,9 @@ namespace Project_manager_app
             do
             {
                 Console.Clear();
-                Console.Write("1 - View All Projects With Their Tasks\n2 - Accounts\n3 - Exit the application\n");
+                Console.Write("1 - View all tasks inside the project\n2 - View details of the project\n3 - Edit status of the project\n4 - Add task to the project\n5 - Delete task from the project\n6 - Expected duration of all active tasks in the project\n7 - Exit the submenu\n");
 
-                switch (ChooseOption(new List<int>() { 1, 2, 3 }))
+                switch (ChooseOption(new List<int>() { 1, 2, 3, 4, 5, 6, 7 }))
                 {
                     case 1:
                         PrintAllTasksInsideList(projectsAndTasks[project]);
@@ -546,68 +546,75 @@ namespace Project_manager_app
 
         static void ManageTask(Dictionary<Project, List<Task>> projectsAndTasks)
         {
-
-        }
-
-
-
-
-        static void PrintProject(Project project)
-        {
-            Console.Write($"\nProject name: {project.Name}\nDescription: {project.Description}\nStart date: {project.StartDate}\nEnd date: {project.EndDate}\nStatus: {project.Status}\n\n");
-        }
-        static void PrintAllTasksInsideList(List<Task> listOfTasks)
-        {
-            foreach(var task in listOfTasks)
+            var changeTask = false;
+            do
             {
-                PrintTaskWithoutProjectName(task);
+                Console.Clear();
+                changeTask = false;
+                var exitMenu = false;
+
+                var task = ChooseTask(projectsAndTasks);
+                
+                do
+                {
+                    Console.Clear();
+                    Console.Write("1 - View details of task\n2 - Edit status of task\n3 - Choose new task\n3 - Exit submenu\n");
+
+                    switch (ChooseOption(new List<int>() { 1, 2, 3 }))
+                    {
+                        case 1:
+                            PrintTaskWithProjectName(task);
+                            Console.ReadKey();
+                            break;
+                        case 2:
+                            EditStatusOfTask(task, projectsAndTasks);
+                            break;
+                        case 3:
+                            changeTask = true;
+                            break;
+                        case 4:
+                            exitMenu = true;
+                            break;
+                        default:
+                            break;
+                    }
+                } while (!exitMenu);
+            } while (changeTask);
+        }
+        static void EditStatusOfTask(Task task, Dictionary<Project, List<Task>> projectsAndTasks)
+        {
+            if (task.Status == StatusTask.Completed)
+                Console.WriteLine("Status of completed task cannot be changed. ");
+            else
+            {
+                var status = NewStatusTask();
+                task.Status = status;
+                Console.WriteLine("Status of task changed.");
+
+                if (status == StatusTask.Completed)
+                    IsProjectCompleted(task.Project, projectsAndTasks);
             }
         }
-        static void PrintTaskWithoutProjectName(Task task)
+        static void IsProjectCompleted(Project project, Dictionary<Project, List<Task>> projectsAndTasks)
         {
-            Console.Write($"Task name: {task.Name}\nDescription: {task.Description}\nDeadline: {task.Deadline}\nStatus: {task.Status}\nExpected duration: {task.ExpectedDuration}\n\n");
-        }
-        static void PrintTaskWithProjectName(Task task)
-        {
-            Console.Write($"Task name: {task.Name}\nDescription: {task.Description}\nDeadline: {task.Deadline}\nStatus: {task.Status}\nExpected duration: {task.ExpectedDuration}\nProject name: {task.Project.Name}\n\n");
-        }
-
-
-        static StatusProject StatusOfNewProject()
-        {
-            if (ChooseTwoOptions("Project status:\n1 - Active\n2 - On hold\n"))
-                return StatusProject.Active;
-            else
-                return StatusProject.OnHold;
-        }
-        static StatusProject NewStatusProject()
-        {
-            Console.Write("Project status:\n1 - Active\n2 - On hold\n3 - Completed\n");
-            switch (ChooseOption(new List<int>() { 1,2,3}))
+            var projectIsCompleted = true;
+            foreach(var task in projectsAndTasks[project])
             {
-                case 1:
-                    return StatusProject.Active;
-                case 2:
-                    return StatusProject.OnHold;
-                default:
-                    return StatusProject.Completed;
+                if (task.Status != StatusTask.Completed)
+                    projectIsCompleted = false;
+            }
+            if (projectIsCompleted)
+            {
+                project.Status = StatusProject.Completed;
+                Console.WriteLine($"Status of project {project.Name} is now completed.");
             }
         }
-        static StatusTask NewStatusTask()
-        {
-            Console.Write("Task status:\n1 - Active\n2 - Deferred\n3 - Finished\n");
 
-            var choosedOption = ChooseOption(new List<int>() { 1, 2, 3 });
-            if (choosedOption == 1)
-                return StatusTask.Active;
-            else if (choosedOption == 2)
-                return StatusTask.Postponed;
-            else
-                return StatusTask.Completed;
-        }
+
+
         static bool ProjectExists(string name, Dictionary<Project, List<Task>> projectsAndTasks)
         {
-            foreach(var project in projectsAndTasks.Keys)
+            foreach (var project in projectsAndTasks.Keys)
             {
                 if (project.Name == name) return true;
             }
@@ -615,7 +622,7 @@ namespace Project_manager_app
         }
         static Project FindProject(string name, Dictionary<Project, List<Task>> projectsAndTasks)
         {
-            foreach(var project in projectsAndTasks.Keys)
+            foreach (var project in projectsAndTasks.Keys)
             {
                 if (project.Name == name)
                     return project;
@@ -649,10 +656,96 @@ namespace Project_manager_app
             }
             return null;
         }
+        static Task ChooseTask(Dictionary<Project, List<Task>> projectsAndTasks)
+        {
+            do
+            {
+                if (!ChooseOptionText("Do you know the name of the task you want? "))
+                {
+                    foreach (var project in projectsAndTasks.Keys)
+                        PrintAllTasksInsideList(projectsAndTasks[project]);
+                }
+                var taskName = NewString("\nEnter task name: ");
+
+                if (ChooseOptionText("Do you know the name of the project of your task? "))
+                {
+                    var project = ChooseProject(projectsAndTasks);
+                    var task = FindTask(taskName, projectsAndTasks[project]);
+                    if (task != null)
+                        return task;
+                    else
+                        Console.WriteLine($"There is no task with name {taskName} in that project.");
+                }
+
+                foreach (var project in projectsAndTasks.Keys)
+                {
+                    foreach (var task in projectsAndTasks[project])
+                    {
+                        if (task.Name == taskName)
+                        {
+                            PrintTaskWithProjectName(task);
+                            if (ChooseOptionText("Do you want this task?"))
+                                return task;
+                        }
+                    }
+                }
+            } while (true);
+        }
 
 
-        
-        
+        static StatusProject StatusOfNewProject()
+        {
+            if (ChooseTwoOptions("Project status:\n1 - Active\n2 - On hold\n"))
+                return StatusProject.Active;
+            else
+                return StatusProject.OnHold;
+        }
+        static StatusProject NewStatusProject()
+        {
+            Console.Write("Project status:\n1 - Active\n2 - On hold\n3 - Completed\n");
+            switch (ChooseOption(new List<int>() { 1,2,3}))
+            {
+                case 1:
+                    return StatusProject.Active;
+                case 2:
+                    return StatusProject.OnHold;
+                default:
+                    return StatusProject.Completed;
+            }
+        }
+        static StatusTask NewStatusTask()
+        {
+            Console.Write("Task status:\n1 - Active\n2 - Postponed\n3 - Completed\n");
+
+            var choosedOption = ChooseOption(new List<int>() { 1, 2, 3 });
+            if (choosedOption == 1)
+                return StatusTask.Active;
+            else if (choosedOption == 2)
+                return StatusTask.Postponed;
+            else
+                return StatusTask.Completed;
+        }
+
+
+        static void PrintProject(Project project)
+        {
+            Console.Write($"\nProject name: {project.Name}\nDescription: {project.Description}\nStart date: {project.StartDate}\nEnd date: {project.EndDate}\nStatus: {project.Status}\n\n");
+        }
+        static void PrintAllTasksInsideList(List<Task> listOfTasks)
+        {
+            foreach (var task in listOfTasks)
+            {
+                PrintTaskWithoutProjectName(task);
+            }
+        }
+        static void PrintTaskWithoutProjectName(Task task)
+        {
+            Console.Write($"Task name: {task.Name}\nDescription: {task.Description}\nDeadline: {task.Deadline}\nStatus: {task.Status}\nExpected duration: {task.ExpectedDuration}\n\n");
+        }
+        static void PrintTaskWithProjectName(Task task)
+        {
+            Console.Write($"Task name: {task.Name}\nDescription: {task.Description}\nDeadline: {task.Deadline}\nStatus: {task.Status}\nExpected duration: {task.ExpectedDuration}\nProject name: {task.Project.Name}\n\n");
+        }
 
 
 
