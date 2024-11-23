@@ -363,7 +363,7 @@ namespace Project_manager_app
                         ManageTask(projectsAndTasks);
                         break;
                     case 8:
-                        exitMenu = false;
+                        exitMenu = true;
                         break;
                     default:
                         break;
@@ -375,38 +375,37 @@ namespace Project_manager_app
         {
             foreach(var project in projectsAndTasks.Keys)
             {
-                PrintProject(project);
-                PrintAllTasksInsideList(projectsAndTasks[project]);
-                if (!ChooseOptionText("Do you want the next project to be displayed? ")) break;
+                Console.Write($"\nProject name:\n\t{project.Name}\nTask names:\n");
+                PrintNamesOfTasksInsideList(projectsAndTasks[project], "\t");
             }
         }
         static void AddNewProject(Dictionary<Project, List<Task>> projectsAndTasks)
         {
             var name = NewString("Enter project name: ");
-            while(ProjectExists(name, projectsAndTasks))
+            while (ProjectExists(name, projectsAndTasks))
             {
                 name = NewString("There is already project with that name. Enter new project name: ");
             }
             var description = NewString("Enter description: ");
             var startDate = NewFutureDate("project start");
             var endDate = NewFutureDate("project end");
-            while(startDate > endDate)
+            while (startDate > endDate)
             {
                 Console.Write($"Project cannot end before it starts. Start date is {startDate}\n");
                 endDate = NewFutureDate("project end");
             }
             var status = StatusOfNewProject();
+            var project = new Project(name, description, startDate, endDate, status);
 
-            var project = new Project(name,description,startDate,endDate,status);
+            projectsAndTasks[project] = new List<Task>();
+            Console.Clear();
+
             if (ChooseOptionText("Do you want to add tasks? "))
-                projectsAndTasks[project] = AddNewTasks(project, projectsAndTasks);
-            else
-                projectsAndTasks[project] = new List<Task>();
+                AddNewTasks(project, projectsAndTasks);
         }
         static void DeleteProject(Dictionary<Project, List<Task>> projectsAndTasks)
         {
-            foreach (var project_ in projectsAndTasks.Keys)
-                Console.WriteLine(project_.Name);
+            PrintNamesOfAllProjects(projectsAndTasks);
             do
             {
                 var project = ChooseProject(projectsAndTasks);
@@ -418,18 +417,17 @@ namespace Project_manager_app
                 {
                     Console.Clear();
                     projectsAndTasks.Remove(project);
-                    Console.WriteLine("Project is deleted.\n\n");
+                    Console.WriteLine("Project is deleted.\n");
                 }
                 else
                 {
                     Console.Clear();
-                    Console.WriteLine("Project is not deleted.\n\n");
+                    Console.WriteLine("Project is not deleted.\n");
                 }
 
-                foreach (var project_ in projectsAndTasks.Keys)
-                    Console.WriteLine(project_.Name);
+                PrintNamesOfAllProjects(projectsAndTasks);
 
-            } while (ChooseOptionText("Do you want to delete another project? "));
+            } while (ChooseOptionText("\nDo you want to delete another project? "));
         }
         static void ViewUpcomingTasksWithinSevenDays(Dictionary<Project, List<Task>> projectsAndTasks)
         {
@@ -438,68 +436,105 @@ namespace Project_manager_app
                 foreach(Task task in projectsAndTasks[project])
                 {
                     if(DateTime.Today <= task.Deadline && task.Deadline <= DateTime.Today.AddDays(7))
-                        PrintTaskWithProjectName(task);
+                        PrintTask(task);
                 }
             }
         }
         static void ViewAllProjectsWithChoosenStatus(Dictionary<Project, List<Task>> projectsAndTasks)
         {
+            var atLeastOneProjectExists = false;
             var status = NewStatusProject();
+            Console.Clear();
+
             foreach (var project in projectsAndTasks.Keys)
             {
                 if (project.Status == status)
+                {
                     PrintProject(project);
+                    atLeastOneProjectExists = true;
+                }
             }
+            if (!atLeastOneProjectExists)
+                Console.WriteLine($"There are no projects with status {status}\n");
         }
         static void ManageProject(Dictionary<Project, List<Task>> projectsAndTasks)
         {
-            var project = ChooseProject(projectsAndTasks);
-
-            var exitMenu = false;
+            var changeProject = false;
             do
             {
                 Console.Clear();
-                Console.Write("1 - View all tasks inside the project\n2 - View details of the project\n3 - Edit status of the project\n4 - Add task to the project\n5 - Delete task from the project\n6 - Expected duration of all active tasks in the project\n7 - Exit the submenu\n");
+                changeProject = false;
+                var exitMenu = false;
 
-                switch (ChooseOption(new List<int>() { 1, 2, 3, 4, 5, 6, 7 }))
+                var project = ChooseProject(projectsAndTasks);
+                do
                 {
-                    case 1:
-                        PrintAllTasksInsideList(projectsAndTasks[project]);
-                        Console.ReadKey();
-                        break;
-                    case 2:
-                        PrintProject(project);
-                        Console.ReadKey();
-                        break;
-                    case 3:
-                        project.Status = NewStatusProject();
-                        break;
-                    case 4:
-                        projectsAndTasks[project].Add(AddNewTask(project, projectsAndTasks));
-                        break;
-                    case 5:
-                        DeleteTask(project,projectsAndTasks);
-                        break;
-                    case 6:
-                        ExpectedDurationForAllActivTasksInProject(project, projectsAndTasks);
-                        Console.ReadKey();
-                        break;
-                    case 7:
-                        exitMenu = false;
-                        break;
-                    default:
-                        break;
-                }
-            } while (!exitMenu);
+                    Console.Clear();
+                    Console.Write("1 - View all tasks inside the project\n2 - View details of the project\n3 - Edit status of the project\n4 - Add task to the project\n5 - Delete task from the project\n6 - Expected duration of all active tasks in the project\n7 - Choose another project\n8 - Exit the submenu\n");
+
+                    switch (ChooseOption(new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8 }))
+                    {
+                        case 1:
+                            PrintNamesOfTasksInsideList(projectsAndTasks[project]);
+                            Console.ReadKey();
+                            break;
+                        case 2:
+                            PrintProject(project);
+                            Console.ReadKey();
+                            break;
+                        case 3:
+                            EditStatusOfProject(project, projectsAndTasks);
+                            Console.ReadKey();
+                            break;
+                        case 4:
+                            projectsAndTasks[project].Add(AddNewTask(project, projectsAndTasks));
+                            break;
+                        case 5:
+                            DeleteTask(project, projectsAndTasks);
+                            break;
+                        case 6:
+                            ExpectedDurationForAllActivTasksInProject(project, projectsAndTasks);
+                            Console.ReadKey();
+                            break;
+                        case 7:
+                            changeProject = true;
+                            exitMenu = true;
+                            break;
+                        case 8:
+                            exitMenu = true;
+                            break;
+                        default:
+                            break;
+                    }
+                } while (!exitMenu);
+            } while (changeProject);
         }
-        static List<Task> AddNewTasks(Project project, Dictionary<Project, List<Task>> projectsAndTasks)
+        static void EditStatusOfProject(Project project, Dictionary<Project, List<Task>> projectsAndTasks)
         {
-            var listOfTasks = new List<Task>();
+            if (project.Status == StatusProject.Completed)
+                Console.WriteLine("Status of completed project cannot be changed.");
+            else
+            {
+                project.Status = NewStatusProject();
+                Console.WriteLine("Status of project changed.");
+
+                if (project.Status == StatusProject.Completed)
+                    CompleteTasksInProject(project, projectsAndTasks);
+            }
+        }
+        static void CompleteTasksInProject(Project project, Dictionary<Project, List<Task>> projectsAndTasks)
+        {
+            foreach (var task in projectsAndTasks[project])
+                task.Status = StatusTask.Completed;
+        }
+
+        static void AddNewTasks(Project project, Dictionary<Project, List<Task>> projectsAndTasks)
+        {
             do
             {
-                listOfTasks.Add(AddNewTask(project, projectsAndTasks));
-            } while (ChooseOptionText("Task is added. Do you want to add new task to the project? "));
-            return listOfTasks;
+                Console.Clear();
+                projectsAndTasks[project].Add(AddNewTask(project, projectsAndTasks));
+            } while (ChooseOptionText("\nTask is added.\nDo you want to add new task to the project? "));
         }
         static Task AddNewTask(Project project, Dictionary<Project, List<Task>> projectsAndTasks)
         {
@@ -509,7 +544,7 @@ namespace Project_manager_app
                 name = NewString("There is already task with that name in this project. Enter new task name: ");
             }
             var description = NewString("Enter description: ");
-            var deadline = NewFutureDate("project start");
+            var deadline = NewFutureDate("task start");
             var status = NewStatusTask();
             var expectedDuration = NewNumber("Expected duration of project in minutes: ");
 
@@ -523,7 +558,7 @@ namespace Project_manager_app
                 name = NewString("There is no task with that name in this project. Enter task name: ");
             }
             var task = FindTask(name, projectsAndTasks[project]);
-            PrintTaskWithProjectName(task);
+            PrintTask(task);
 
             if (ChooseOptionText("Are you sure you want to delete this task? "))
             {
@@ -554,23 +589,24 @@ namespace Project_manager_app
                 var exitMenu = false;
 
                 var task = ChooseTask(projectsAndTasks);
-                
                 do
                 {
                     Console.Clear();
-                    Console.Write("1 - View details of task\n2 - Edit status of task\n3 - Choose new task\n3 - Exit submenu\n");
+                    Console.Write("1 - View details of task\n2 - Edit status of task\n3 - Choose new task\n4 - Exit submenu\n");
 
-                    switch (ChooseOption(new List<int>() { 1, 2, 3 }))
+                    switch (ChooseOption(new List<int>() { 1, 2, 3, 4 }))
                     {
                         case 1:
-                            PrintTaskWithProjectName(task);
+                            PrintTask(task);
                             Console.ReadKey();
                             break;
                         case 2:
                             EditStatusOfTask(task, projectsAndTasks);
+                            Console.ReadKey();
                             break;
                         case 3:
                             changeTask = true;
+                            exitMenu = true;
                             break;
                         case 4:
                             exitMenu = true;
@@ -584,21 +620,23 @@ namespace Project_manager_app
         static void EditStatusOfTask(Task task, Dictionary<Project, List<Task>> projectsAndTasks)
         {
             if (task.Status == StatusTask.Completed)
-                Console.WriteLine("Status of completed task cannot be changed. ");
+                Console.WriteLine("\nStatus of completed task cannot be changed. ");
             else
             {
                 var status = NewStatusTask();
                 task.Status = status;
-                Console.WriteLine("Status of task changed.");
+                Console.WriteLine("\nStatus of task changed.");
 
                 if (status == StatusTask.Completed)
                     IsProjectCompleted(task.Project, projectsAndTasks);
             }
         }
+
+
         static void IsProjectCompleted(Project project, Dictionary<Project, List<Task>> projectsAndTasks)
         {
             var projectIsCompleted = true;
-            foreach(var task in projectsAndTasks[project])
+            foreach (var task in projectsAndTasks[project])
             {
                 if (task.Status != StatusTask.Completed)
                     projectIsCompleted = false;
@@ -610,13 +648,11 @@ namespace Project_manager_app
             }
         }
 
-
-
         static bool ProjectExists(string name, Dictionary<Project, List<Task>> projectsAndTasks)
         {
             foreach (var project in projectsAndTasks.Keys)
             {
-                if (project.Name == name) return true;
+                if (project.Name.ToUpper() == name.ToUpper()) return true;
             }
             return false;
         }
@@ -624,14 +660,14 @@ namespace Project_manager_app
         {
             foreach (var project in projectsAndTasks.Keys)
             {
-                if (project.Name == name)
+                if (project.Name.ToUpper() == name.ToUpper())
                     return project;
             }
             return null;
         }
         static Project ChooseProject(Dictionary<Project, List<Task>> projectsAndTasks)
         {
-            var name = NewString("Enter project name: ");
+            var name = NewString("\nEnter project name: ");
             while (!ProjectExists(name, projectsAndTasks))
             {
                 name = NewString("There is no project with that name. Enter new project name: ");
@@ -643,7 +679,7 @@ namespace Project_manager_app
         {
             foreach (var task in projectsAndTasks[project])
             {
-                if (task.Name == name) return true;
+                if (task.Name.ToUpper() == name.ToUpper()) return true;
             }
             return false;
         }
@@ -651,7 +687,7 @@ namespace Project_manager_app
         {
             foreach (var task in listOfTaskstasks)
             {
-                if (task.Name == name)
+                if (task.Name.ToUpper() == name.ToUpper())
                     return task;
             }
             return null;
@@ -660,31 +696,33 @@ namespace Project_manager_app
         {
             do
             {
-                if (!ChooseOptionText("Do you know the name of the task you want? "))
+                if (!ChooseOptionText("\nDo you know the name of the task you want? "))
                 {
+                    Console.Clear();
                     foreach (var project in projectsAndTasks.Keys)
-                        PrintAllTasksInsideList(projectsAndTasks[project]);
+                        PrintNamesOfTasksInsideList(projectsAndTasks[project]);
                 }
                 var taskName = NewString("\nEnter task name: ");
 
-                if (ChooseOptionText("Do you know the name of the project of your task? "))
+                if (ChooseOptionText("\nDo you know the name of the project of your task? "))
                 {
+                    Console.Clear();
                     var project = ChooseProject(projectsAndTasks);
                     var task = FindTask(taskName, projectsAndTasks[project]);
                     if (task != null)
                         return task;
                     else
-                        Console.WriteLine($"There is no task with name {taskName} in that project.");
+                        Console.WriteLine($"\nThere is no task with name {taskName} in that project.");
                 }
-
+                Console.Clear();
                 foreach (var project in projectsAndTasks.Keys)
                 {
                     foreach (var task in projectsAndTasks[project])
                     {
                         if (task.Name == taskName)
                         {
-                            PrintTaskWithProjectName(task);
-                            if (ChooseOptionText("Do you want this task?"))
+                            PrintTask(task);
+                            if (ChooseOptionText("\nDo you want this task? "))
                                 return task;
                         }
                     }
@@ -695,7 +733,7 @@ namespace Project_manager_app
 
         static StatusProject StatusOfNewProject()
         {
-            if (ChooseTwoOptions("Project status:\n1 - Active\n2 - On hold\n"))
+            if (ChooseBetweenTwoOptions("Project status:\n1 - Active\n2 - On hold\n"))
                 return StatusProject.Active;
             else
                 return StatusProject.OnHold;
@@ -715,7 +753,7 @@ namespace Project_manager_app
         }
         static StatusTask NewStatusTask()
         {
-            Console.Write("Task status:\n1 - Active\n2 - Postponed\n3 - Completed\n");
+            Console.Write("\nTask status:\n1 - Active\n2 - Postponed\n3 - Completed\n");
 
             var choosedOption = ChooseOption(new List<int>() { 1, 2, 3 });
             if (choosedOption == 1)
@@ -727,22 +765,24 @@ namespace Project_manager_app
         }
 
 
+
         static void PrintProject(Project project)
         {
-            Console.Write($"\nProject name: {project.Name}\nDescription: {project.Description}\nStart date: {project.StartDate}\nEnd date: {project.EndDate}\nStatus: {project.Status}\n\n");
+            Console.Write($"Project name: {project.Name}\nDescription: {project.Description}\nStart date: {project.StartDate}\nEnd date: {project.EndDate}\nStatus: {project.Status}\n\n");
         }
-        static void PrintAllTasksInsideList(List<Task> listOfTasks)
+        static void PrintNamesOfAllProjects(Dictionary<Project, List<Task>> projectsAndTasks)
+        {
+            Console.WriteLine("Project names:");
+
+            foreach (var project in projectsAndTasks.Keys)
+                Console.WriteLine("\t" + project.Name);
+        }
+        static void PrintNamesOfTasksInsideList(List<Task> listOfTasks, string sign = "")
         {
             foreach (var task in listOfTasks)
-            {
-                PrintTaskWithoutProjectName(task);
-            }
+                Console.WriteLine(sign + task.Name);
         }
-        static void PrintTaskWithoutProjectName(Task task)
-        {
-            Console.Write($"Task name: {task.Name}\nDescription: {task.Description}\nDeadline: {task.Deadline}\nStatus: {task.Status}\nExpected duration: {task.ExpectedDuration}\n\n");
-        }
-        static void PrintTaskWithProjectName(Task task)
+        static void PrintTask(Task task)
         {
             Console.Write($"Task name: {task.Name}\nDescription: {task.Description}\nDeadline: {task.Deadline}\nStatus: {task.Status}\nExpected duration: {task.ExpectedDuration}\nProject name: {task.Project.Name}\n\n");
         }
@@ -751,11 +791,15 @@ namespace Project_manager_app
 
         static string NewString(string message)
         {
+            var tryInt = 0;
+            var tryDate = new DateTime();
+
             Console.Write(message);
             var myString = Console.ReadLine();
-            while (myString == "")
+
+            while (int.TryParse(myString, out tryInt) || DateTime.TryParse(myString, out tryDate) || myString=="")
             {
-                Console.Write(message);          //############
+                Console.Write("Not allowed to enter number/date or nothing. " + message);
                 myString = Console.ReadLine();
             }
             return myString;
@@ -794,7 +838,7 @@ namespace Project_manager_app
                 else if (upperLimit != int.MaxValue && myOption > upperLimit)
                     Console.Write($"Please enter number lower than {upperLimit}. ");
 
-            } while (myOption <= lowerLimit || myOption > upperLimit || myOption == 0);
+            } while (myOption < lowerLimit || myOption > upperLimit || myOption == 0);
 
             return myOption;
         }
@@ -834,6 +878,14 @@ namespace Project_manager_app
                 Console.Write("Choosen number is not an option. ");
             } while (true);
         }
+        static bool ChooseBetweenTwoOptions(string message)
+        {
+            Console.Write(message);
+            if (ChooseOption(new List<int>() { 1, 2 }) == 1)
+                return true;
+            else
+                return false;
+        }
         static bool ChooseOptionText(string message = "")
         {
             do
@@ -846,14 +898,6 @@ namespace Project_manager_app
                     Console.Write("Choosen input wasn't correct. ");
                 }
             } while (true);
-        }
-        static bool ChooseTwoOptions(string message)
-        {
-            Console.Write(message);
-            if (ChooseOption(new List<int>() { 1, 2 }) == 1)
-                return true;
-            else
-                return false;
         }
     }
 }
